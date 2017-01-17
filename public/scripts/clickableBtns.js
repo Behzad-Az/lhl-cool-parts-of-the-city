@@ -1,11 +1,16 @@
+// actions for when different buttons are clicked.
+
 $(function () {
-  // action for when compose is clicked
+
+  // jQuery the buttons
   let changeMapDataBtn = $('.mapDataChangeBtn');
   let mapTitleInput = $('#mapTitleInput');
   let editThisMapBtn = $('#editThisMapBtn');
   let deleteMapBtn = $('#deleteMapBtn');
 
+  // Take this action when either save new map and save map changes is clicked
   changeMapDataBtn.on('click', function (event) {
+    event.preventDefault();
     let requestMarkers = conditionMapData(markerArr).outArr;
     let goodData = conditionMapData(markerArr).outBool;
     let $message = $('.map-save-success');
@@ -25,10 +30,7 @@ $(function () {
       $.ajax({
         type: 'POST',
         url: postRoute,
-        data: templateVars,
-        success: function () {
-          console.log('SUCCESS');
-        }
+        data: templateVars
       });
 
     } else if (mapTitleInput.val() !== "" && action === 'newMap' && markerArr.length > 0 && goodData) {
@@ -46,17 +48,15 @@ $(function () {
       $.ajax({
         type: 'POST',
         url: postRoute,
-        data: templateVars,
-        success: function () {
-          console.log('SUCCESS');
-        }
+        data: templateVars
       });
     } else alert ("Please fill in the map title and info-box info for each point");
   });
 
-  $('body').on('click', '.submitInfoBox', function(e) {
-    e.preventDefault();
-    console.log("being clicked: ", thisMarker);
+
+  // Action when submit button is clicked on any google map marker window.
+  $('body').on('click', '.submitInfoBox', function(event) {
+    event.preventDefault();
     let $form = $(this).parent();
     let formData = {
       title: $form.find('input[name="title"]').val(),
@@ -72,26 +72,25 @@ $(function () {
     closeAllGoddamnInfoWindows();
   });
 
+  // Action when edit this map is clicked.
   editThisMapBtn.on('click', function (event) {
-    console.log(currentMapId);
+    event.preventDefault();
     $.ajax({
         type: 'POST',
         url: '/editCurrentMap',
         success: function (response) {
-          console.log('success');
           if (response.redirect) {window.location.href = response.redirect;}
         }
       });
   });
 
+  // Action when delete map is clicked
   deleteMapBtn.on('click', function (event) {
-    console.log('I am in delete map inside clickable button')
-    //console.log(currentMapId);
+    event.preventDefault();
     $.ajax({
         type: 'POST',
         url: '/deleteMap',
         success: function (response) {
-          console.log('success');
           if (response.redirect) {window.location.href = response.redirect;}
         }
       });
@@ -99,6 +98,8 @@ $(function () {
 
 });
 
+// check and condition the marker array data to send a usable request to
+// the server that is free of unwanted data.
 function conditionMapData (markerArr) {
   let requestMarkers = [];
   let outBool = true;
@@ -110,11 +111,9 @@ function conditionMapData (markerArr) {
 
     if (!marker.infoBox) {
       outBool = false;
-      console.log('XXX');
     } else if (marker.infoBox.title === "" || marker.infoBox.description === "" || marker.infoBox.url === "") {
       outBool = false;
-      console.log('YYY');
-    } else { requestMarkers[index].infoBox = marker.infoBox; console.log('ZZZ');}
+    } else { requestMarkers[index].infoBox = marker.infoBox; }
   });
   return {outBool: outBool, outArr: requestMarkers}
 }

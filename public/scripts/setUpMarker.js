@@ -37,18 +37,14 @@ function marker(lat, lng, map, name, description, url) {
 
     google.maps.event.addListener(thisMarker, 'click', markerClicked);
 
-    console.log("setting up listener on: ", thisMarker);
-
     $('.submitInfoBox', $form).on('click', function(e) {
       e.preventDefault();
-      console.log("update being clicked: ", this);
       let $form = $(this).parent().parent();
       let formData = {
         title: $form.find('input[name="title"]').val(),
         description: $form.find('input[name="description"]').val(),
         url: $form.find('input[name="url"]').val()
       };
-
 
       indexInmarkerArr = searchForMarker(infoWindow.anchor);
       if (indexInmarkerArr > -1) {
@@ -59,7 +55,6 @@ function marker(lat, lng, map, name, description, url) {
 
     $('.deleteMarker', $form).on('click', function(e) {
       e.preventDefault();
-      console.log("delete being clicked: ", this);
       removeMarker(infoWindow.anchor);
 
       closeAllGoddamnInfoWindows();

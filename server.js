@@ -148,12 +148,9 @@ app.post("/", (req, res) => {
         console.log("email found in the db");
         bcrypt.compare(input.password, passwordFound, (err, passwordMatch) => {
           if (passwordMatch) {
-            // console.log("current_user: ", current_user)
             req.session.current_user = current_user;
             knex('maps').where('user_id', current_user.id).asCallback((err, rows) => {
-              console.log("IDDDDDDD-BEFORE: ", tempMapId);
               tempMapId = rows[0].id;
-              console.log("IDDDDDDD-AFTER: ", tempMapId);
               res.redirect(`/users/${input.username}`);
               return;
             });
@@ -265,7 +262,6 @@ app.get("/users/:username/:mapid", (req, res) => {
 
 
 app.post("/users/:username/:mapid", (req, res) => {
-  console.log('Editing map....');
   let map_id = tempMapId;
   let mapTemplate = {
     centre_x: req.body.mapCentreLat,
@@ -281,7 +277,6 @@ app.post("/users/:username/:mapid", (req, res) => {
   knex('maps').where('id', map_id).update(mapTemplate).then((resp) => {
     knex('coordinates').where('map_id', map_id).del().then((resp) => {
       mapPoints.forEach((point) => {
-        console.log(point);
         let pointTemplate = {
           lng: point.lng,
           lat: point.lat,
@@ -305,13 +300,11 @@ app.post("/users/:username/:mapid", (req, res) => {
 //     +---------------------------+
 
 app.post("/listMaps", (req, res) => {
-  console.log("HERE: ", typeof(tempMapId));
   tempMapId = req.body.mapId;
   res.send({redirect: `/users/${req.session.current_user.username}`});
 });
 
 app.post("/deleteMap", (req, res) => {
-  console.log(tempMapId);
   knex('coordinates').where('map_id', tempMapId).del().asCallback(function(err, rows) {
      if (err) throw err;
      knex('maps').where('id', tempMapId).del().asCallback(function(err, rows) {
@@ -340,7 +333,6 @@ app.get("/users/:username", (req, res) => {
 
   knex('maps').select('id', 'title').where('user_id', req.session.current_user.id).asCallback((err, rows) => {
     if (err) throw err;
-    console.log(rows);
     list = rows;
   });
 
@@ -357,7 +349,6 @@ app.get("/users/:username", (req, res) => {
           pointsData: pointsData,
           list: list
       };
-      console.log(dataTemplate);
       dataTemplate = JSON.stringify(dataTemplate);
       res.render('user-homepage', {data: dataTemplate});
     });
@@ -374,7 +365,7 @@ function emptyDataTables (dataTable) {
     if (err) throw err;
     knex(dataTable).select().asCallback(function (err, rows) {
       if (err) throw err;
-      else console.log(rows);
+      else console.log("emptied:", rows);
     });
   });
 }
